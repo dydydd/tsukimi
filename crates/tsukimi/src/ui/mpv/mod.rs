@@ -1,6 +1,5 @@
 pub mod control_sidebar;
 pub mod danmaku;
-pub mod danmaku_heatmap;
 pub mod danmaku_cache_map;
 pub mod danmaku_client;
 pub mod danmaku_popover;

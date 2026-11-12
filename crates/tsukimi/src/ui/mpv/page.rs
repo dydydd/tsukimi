@@ -631,7 +631,7 @@ impl MPVPage {
             counts[idx] += 1;
         }
         let densities: Vec<f32> = counts.iter().map(|&c| c as f32).collect();
-        imp.video_scale.set_heatmap_data(densities, duration);
+        imp.video_scale.set_heatmap_data(densities);
     }
 
     fn clear_danmaku(&self, status: DanmakuPopoverStatus) {
@@ -1285,7 +1285,6 @@ impl MPVPage {
         if !imp.video_scale.is_dragging() {
             imp.video_scale.set_value(value as f64);
         }
-        imp.video_scale.set_heatmap_position(value as f64);
         self.update_skip_segment_button(value as f64);
 
         if let Some(time_millis) = imp
