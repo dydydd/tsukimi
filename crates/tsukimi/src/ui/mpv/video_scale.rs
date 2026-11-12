@@ -7,7 +7,10 @@ use gtk::{
 use mutsumi::*;
 
 mod imp {
-    use std::cell::Cell;
+    use std::cell::{
+        Cell,
+        RefCell,
+    };
 
     use gtk::{
         glib,
@@ -24,6 +27,10 @@ mod imp {
         pub player: glib::WeakRef<MPVPlaySink>,
 
         pub is_dragging: Cell<bool>,
+
+        pub heatmap_densities: RefCell<Vec<f32>>,
+        pub heatmap_duration: Cell<f64>,
+        pub heatmap_position: Cell<f64>,
     }
 
     #[glib::object_subclass]
@@ -37,7 +44,6 @@ mod imp {
     impl ObjectImpl for VideoScale {
         fn constructed(&self) {
             self.parent_constructed();
-
             // new GestureClick with add_controller is doesn't work for connect_released
             //
             // so we need to iterate through the controllers to get the GestureClick
