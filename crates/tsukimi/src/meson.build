@@ -59,6 +59,16 @@ env.set('TSUKIMI_VERSION', version)
 env.set('TSUKIMI_LOCALEDIR', localedir)
 env.set('TSUKIMI_PKGDATADIR', pkgdatadir)
 
+# Allow overriding dandanplay credentials at build time via environment variables.
+dandanplay_appid = run_command(python, '-c', 'import os; print(os.environ.get("DANDANPLAY_APPID", ""))', check: false).stdout().strip()
+dandanplay_appsecret = run_command(python, '-c', 'import os; print(os.environ.get("DANDANPLAY_APPSECRET", ""))', check: false).stdout().strip()
+if dandanplay_appid != ''
+    env.set('DANDANPLAY_APPID', dandanplay_appid)
+endif
+if dandanplay_appsecret != ''
+    env.set('DANDANPLAY_APPSECRET', dandanplay_appsecret)
+endif
+
 if git_release
     env.set('TSUKIMI_RELEASE', '1')
 else

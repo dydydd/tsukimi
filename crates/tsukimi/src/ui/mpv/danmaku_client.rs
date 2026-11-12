@@ -8,7 +8,20 @@ use mutsumi::Danmaku;
 
 use crate::ui::mpv::danmaku::DanmakuExt;
 
-const X_APPID: &str = "e9imrhcexn";
+// Allow overriding the dandanplay credentials at build time so you can use your own
+// AppId/AppSecret instead of the shared one. Set DANDANPLAY_APPID and
+// DANDANPLAY_APPSECRET when building (e.g. `DANDANPLAY_APPID=xxx DANDANPLAY_APPSECRET=yyy cargo build`).
+const X_APPID: &str = match option_env!("DANDANPLAY_APPID") {
+    Some(v) => v,
+    None => "e9imrhcexn",
+};
+
+fn app_secret() -> String {
+    match option_env!("DANDANPLAY_APPSECRET") {
+        Some(secret) if !secret.is_empty() => secret.to_string(),
+        _ => yzlm::yzlm(),
+    }
+}
 
 #[derive(Clone)]
 pub struct DanmakuClient(DanDanClient);
@@ -18,7 +31,7 @@ impl DanmakuClient {
         static CLIENT: OnceLock<Option<DanmakuClient>> = OnceLock::new();
         CLIENT
             .get_or_init(|| {
-                if DanDanClient::init(X_APPID.to_string(), yzlm::yzlm()).is_err() {
+                if DanDanClient::init(X_APPID.to_string(), app_secret()).is_err() {
                     tracing::warn!("DanDanClient already initialized, using existing instance...");
                 }
                 Some(Self(DanDanClient::instance()))
