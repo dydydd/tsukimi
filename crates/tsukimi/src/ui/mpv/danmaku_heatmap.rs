@@ -1,6 +1,7 @@
 use gtk::{
     glib,
     prelude::*,
+    subclass::prelude::*,
 };
 
 mod imp {
@@ -8,6 +9,7 @@ mod imp {
 
     use super::*;
     use glib::Properties;
+    use gtk::subclass::prelude::*;
 
     #[derive(Default, Properties)]
     #[properties(wrapper_type = super::DanmakuHeatmap)]
@@ -40,20 +42,39 @@ mod imp {
                     if n == 0 || width <= 0 || height <= 0 {
                         return;
                     }
-                    let bar_w = width as f64 / n as f64;
                     let max = densities.iter().copied().fold(0.0f32, f32::max).max(1e-6);
+                    let step = width as f64 / (n as f64 - 1.0).max(1.0);
+                    // smooth curve points
+                    let mut pts: Vec<(f64, f64)> = Vec::with_capacity(n);
                     for (i, &d) in densities.iter().enumerate() {
                         let t = (d / max).clamp(0.0, 1.0) as f64;
-                        // color gradient: low -> gray/blue, high -> orange/red
-                        let r = 0.3 + 0.7 * t;
-                        let g = 0.4 + 0.2 * (1.0 - t);
-                        let b = 0.8 * (1.0 - t);
-                        cr.set_source_rgba(r, g, b, 0.35 + 0.55 * t);
-                        let x = i as f64 * bar_w;
-                        let h = height as f64 * t.max(0.05);
-                        let _ = cr.rectangle(x, height as f64 - h, bar_w.max(1.0), h);
-                        let _ = cr.fill();
+                        let x = i as f64 * step;
+                        let y = height as f64 * (1.0 - t * 0.9);
+                        pts.push((x, y));
                     }
+                    // fill under curve
+                    cr.move_to(pts[0].0, height as f64);
+                    for &(x, y) in &pts {
+                        cr.line_to(x, y);
+                    }
+                    cr.line_to(pts.last().unwrap().0, height as f64);
+                    cr.close_path();
+                    // parse accent color
+                    let accent = crate::ui::models::SETTINGS.accent_color_code();
+                    let (ar, ag, ab) = parse_hex_color(&accent).unwrap_or((0.68, 0.71, 0.98));
+                    let pat = gtk::cairo::LinearGradient::new(0.0, 0.0, 0.0, height as f64);
+                    pat.add_color_stop_rgba(0.0, ar, ag, ab, 0.9);
+                    pat.add_color_stop_rgba(1.0, ar * 0.35, ag * 0.35, ab * 0.35, 0.25);
+                    let _ = cr.set_source(pat);
+                    let _ = cr.fill();
+                    // stroke curve
+                    cr.move_to(pts[0].0, pts[0].1);
+                    for &(x, y) in pts.iter().skip(1) {
+                        cr.line_to(x, y);
+                    }
+                    cr.set_source_rgba(ar, ag, ab, 0.95);
+                    cr.set_line_width(1.5);
+                    let _ = cr.stroke();
                     // position indicator
                     let dur = *imp.duration.borrow();
                     let pos = *imp.position.borrow();
@@ -120,6 +141,17 @@ impl DanmakuHeatmap {
     pub fn set_seek_callback<F: Fn(f64) + 'static>(&self, f: F) {
         *self.imp().seek_cb.borrow_mut() = Some(Box::new(f));
     }
+}
+
+fn parse_hex_color(hex: &str) -> Option<(f64, f64, f64)> {
+    let h = hex.trim().trim_start_matches('#');
+    if h.len() != 6 {
+        return None;
+    }
+    let r = u8::from_str_radix(&h[0..2], 16).ok()? as f64 / 255.0;
+    let g = u8::from_str_radix(&h[2..4], 16).ok()? as f64 / 255.0;
+    let b = u8::from_str_radix(&h[4..6], 16).ok()? as f64 / 255.0;
+    Some((r, g, b))
 }
 
 // end of file
