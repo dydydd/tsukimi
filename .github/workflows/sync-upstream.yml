@@ -56,6 +56,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          AHEAD=$(git rev-list --count main..sync/upstream)
+          echo "Commits ahead of main: $AHEAD"
+          if [ "$AHEAD" -eq 0 ]; then
+            echo "No new commits to sync; skipping pull request."
+            exit 0
+          fi
           if gh pr view sync/upstream --json number >/dev/null 2>&1; then
             echo "Pull request already exists; branch push updated it."
           else
