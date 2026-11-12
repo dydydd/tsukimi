@@ -373,6 +373,7 @@ impl MPVControlSidebar {
             .set_subtitle(&format!("{:.1} MB", mb));
     }
 
+    #[template_callback]
     pub fn on_clear_cache(&self, _button: gtk::Button) {
         let dir = cache_dir();
         if let Ok(entries) = std::fs::read_dir(&dir) {
