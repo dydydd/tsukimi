@@ -172,8 +172,6 @@ mod imp {
         #[template_child]
         pub video_scale: TemplateChild<VideoScale>,
         #[template_child]
-        pub danmaku_heatmap: TemplateChild<crate::ui::mpv::danmaku_heatmap::DanmakuHeatmap>,
-        #[template_child]
         pub progress_time_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub duration_label: TemplateChild<gtk::Label>,
@@ -353,15 +351,6 @@ mod imp {
             });
 
             obj.listen_events();
-
-            // Seek when clicking the danmaku heatmap
-            obj.imp().danmaku_heatmap.set_seek_callback(glib::clone!(
-                #[weak(rename_to = page)]
-                obj,
-                move |t: f64| {
-                    page.imp().video.set_position(t);
-                }
-            ));
 
             // Initialize MPRIS server
 
@@ -630,7 +619,7 @@ impl MPVPage {
         let starts = imp.danmaku_starts.borrow();
         let duration = imp.current_duration.get();
         if starts.is_empty() || duration <= 0.0 {
-            imp.danmaku_heatmap.clear();
+            imp.video_scale.clear_heatmap();
             return;
         }
         let buckets: usize = 120;
@@ -642,14 +631,14 @@ impl MPVPage {
             counts[idx] += 1;
         }
         let densities: Vec<f32> = counts.iter().map(|&c| c as f32).collect();
-        imp.danmaku_heatmap.set_data(densities, duration);
+        imp.video_scale.set_heatmap_data(densities, duration);
     }
 
     fn clear_danmaku(&self, status: DanmakuPopoverStatus) {
         let imp = self.imp();
         imp.danmaku_count.set(0);
         imp.danmakw.clear_danmaku();
-        imp.danmaku_heatmap.clear();
+        imp.video_scale.clear_heatmap();
         imp.danmaku_starts.borrow_mut().clear();
         imp.danmakw.stop_rendering();
         imp.danmaku_popover_content.set_status(status);
@@ -1262,7 +1251,7 @@ impl MPVPage {
         if !imp.danmaku_starts.borrow().is_empty() {
             self.update_danmaku_heatmap();
         } else {
-            imp.danmaku_heatmap.clear();
+            imp.video_scale.clear_heatmap();
         }
     }
 
@@ -1296,7 +1285,7 @@ impl MPVPage {
         if !imp.video_scale.is_dragging() {
             imp.video_scale.set_value(value as f64);
         }
-        imp.danmaku_heatmap.set_position(value as f64);
+        imp.video_scale.set_heatmap_position(value as f64);
         self.update_skip_segment_button(value as f64);
 
         if let Some(time_millis) = imp

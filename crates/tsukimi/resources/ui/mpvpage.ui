@@ -468,33 +468,18 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkBox">
-                            <property name="orientation">vertical</property>
+                          <object class="VideoScale" id="video_scale">
+                            <property name="focusable">True</property>
                             <property name="valign">center</property>
                             <property name="hexpand">True</property>
-                            <property name="spacing">0</property>
-                            <child>
-                              <object class="DanmakuHeatmap" id="danmaku_heatmap">
-                                <property name="height-request">10</property>
-                                <property name="hexpand">True</property>
-                                <property name="focusable">False</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="VideoScale" id="video_scale">
-                                <property name="focusable">True</property>
-                                <property name="valign">center</property>
-                                <property name="hexpand">True</property>
-                                <property name="draw_value">False</property>
-                                <property name="restrict-to-fill-level">False</property>
-                                <property name="show-fill-level">True</property>
-                                <signal name="value-changed" handler="on_progress_value_changed" swapped="yes"/>
-                                <style>
-                                  <class name="accent"/>
-                                  <class name="mpv-seekbar"/>
-                                </style>
-                              </object>
-                            </child>
+                            <property name="draw_value">False</property>
+                            <property name="restrict-to-fill-level">False</property>
+                            <property name="show-fill-level">True</property>
+                            <signal name="value-changed" handler="on_progress_value_changed" swapped="yes"/>
+                            <style>
+                              <class name="accent"/>
+                              <class name="mpv-seekbar"/>
+                            </style>
                           </object>
                         </child>
                         <child>
