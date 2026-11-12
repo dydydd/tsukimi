@@ -172,6 +172,8 @@ mod imp {
         #[template_child]
         pub video_scale: TemplateChild<VideoScale>,
         #[template_child]
+        pub danmaku_heatmap: TemplateChild<crate::ui::mpv::danmaku_heatmap::DanmakuHeatmap>,
+        #[template_child]
         pub progress_time_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub duration_label: TemplateChild<gtk::Label>,
@@ -247,6 +249,8 @@ mod imp {
         pub last_nonzero_volume: Cell<f64>,
         pub danmaku_count: Cell<usize>,
         pub danmaku_generation: Cell<u64>,
+        pub danmaku_starts: RefCell<Vec<f64>>,
+        pub current_duration: Cell<f64>,
         pub file_loaded: Cell<bool>,
 
         pub click_state: Cell<ClickState>,
@@ -349,6 +353,15 @@ mod imp {
             });
 
             obj.listen_events();
+
+            // Seek when clicking the danmaku heatmap
+            obj.imp().danmaku_heatmap.set_seek_callback(glib::clone!(
+                #[weak(rename_to = page)]
+                obj,
+                move |t: f64| {
+                    page.imp().video.set_position(t);
+                }
+            ));
 
             // Initialize MPRIS server
 
@@ -565,8 +578,11 @@ impl MPVPage {
     fn apply_danmaku(&self, danmaku: Vec<Danmaku>, item_name: String, manual: bool) {
         let imp = self.imp();
         let count = danmaku.len();
+        let starts: Vec<f64> = danmaku.iter().map(|d| d.start).collect();
+        imp.danmaku_starts.replace(starts);
         imp.danmakw.load_danmaku(danmaku);
         imp.danmaku_count.set(count);
+        self.update_danmaku_heatmap();
         let status = if manual {
             DanmakuPopoverStatus::ManualLoaded(count, item_name)
         } else {
@@ -609,10 +625,32 @@ impl MPVPage {
         }
     }
 
+    fn update_danmaku_heatmap(&self) {
+        let imp = self.imp();
+        let starts = imp.danmaku_starts.borrow();
+        let duration = imp.current_duration.get();
+        if starts.is_empty() || duration <= 0.0 {
+            imp.danmaku_heatmap.clear();
+            return;
+        }
+        let buckets: usize = 120;
+        let mut counts = vec![0u32; buckets];
+        for &s in starts.iter() {
+            let t = (s / 1000.0).clamp(0.0, duration);
+            let idx = ((t / duration) * (buckets as f64 - 1.0)).round() as usize;
+            let idx = idx.min(buckets - 1);
+            counts[idx] += 1;
+        }
+        let densities: Vec<f32> = counts.iter().map(|&c| c as f32).collect();
+        imp.danmaku_heatmap.set_data(densities, duration);
+    }
+
     fn clear_danmaku(&self, status: DanmakuPopoverStatus) {
         let imp = self.imp();
         imp.danmaku_count.set(0);
         imp.danmakw.clear_danmaku();
+        imp.danmaku_heatmap.clear();
+        imp.danmaku_starts.borrow_mut().clear();
         imp.danmakw.stop_rendering();
         imp.danmaku_popover_content.set_status(status);
     }
@@ -1220,6 +1258,12 @@ impl MPVPage {
         imp.progress_time_label.set_width_chars(width_chars);
         imp.duration_label.set_width_chars(width_chars);
         imp.duration_label.set_text(&duration);
+        imp.current_duration.set(value);
+        if !imp.danmaku_starts.borrow().is_empty() {
+            self.update_danmaku_heatmap();
+        } else {
+            imp.danmaku_heatmap.clear();
+        }
     }
 
     fn speed_cb(&self, value: f64) {
@@ -1252,6 +1296,7 @@ impl MPVPage {
         if !imp.video_scale.is_dragging() {
             imp.video_scale.set_value(value as f64);
         }
+        imp.danmaku_heatmap.set_position(value as f64);
         self.update_skip_segment_button(value as f64);
 
         if let Some(time_millis) = imp

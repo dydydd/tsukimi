@@ -453,6 +453,13 @@
                       </object>
                     </child>
                     <child>
+                      <object class="DanmakuHeatmap" id="danmaku_heatmap">
+                        <property name="height-request">12</property>
+                        <property name="hexpand">True</property>
+                        <property name="focusable">False</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkBox">
                         <property name="orientation">horizontal</property>
                         <property name="spacing">8</property>

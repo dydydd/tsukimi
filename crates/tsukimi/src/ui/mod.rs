@@ -54,5 +54,6 @@ pub fn init() {
     widgets::liked::LikedPage::ensure_type();
     mpv::page::MPVPage::ensure_type();
     mpv::control_sidebar::MPVControlSidebar::ensure_type();
+    mpv::danmaku_heatmap::DanmakuHeatmap::ensure_type();
     widgets::theme_switcher::ThemeSwitcher::ensure_type();
 }
