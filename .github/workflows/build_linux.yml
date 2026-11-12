@@ -53,6 +53,9 @@ jobs:
           rustflags: ""
 
       - name: Build tsukimi for ${{ matrix.platform }}
+        env:
+          DANDANPLAY_APPID: ${{ secrets.DANDANPLAY_APPID }}
+          DANDANPLAY_APPSECRET: ${{ secrets.DANDANPLAY_APPSECRET }}
         run: |
           meson setup build --prefix=/usr
           meson compile -C build
