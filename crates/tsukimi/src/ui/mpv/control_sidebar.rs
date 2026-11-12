@@ -48,6 +48,8 @@ mod imp {
         pub cache_size_adj: TemplateChild<gtk::Adjustment>,
         #[template_child]
         pub cache_time_adj: TemplateChild<gtk::Adjustment>,
+        #[template_child]
+        pub cache_on_disk_switchrow: TemplateChild<adw::SwitchRow>,
 
         #[template_child]
         pub brightness_adj: TemplateChild<gtk::Adjustment>,
@@ -282,6 +284,9 @@ impl MPVControlSidebar {
             .build();
         SETTINGS
             .bind("mpv-cache-time", &imp.cache_time_adj.get(), "value")
+            .build();
+        SETTINGS
+            .bind("mpv-cache-on-disk", &imp.cache_on_disk_switchrow.get(), "active")
             .build();
         SETTINGS
             .bind("mpv-deband", &imp.deband_switch.get(), "active")

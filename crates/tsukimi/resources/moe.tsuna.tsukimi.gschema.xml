@@ -87,6 +87,10 @@
       <default>300</default>
       <summary>Default mpv-cache-time</summary>
     </key>
+    <key name="mpv-cache-on-disk" type="b">
+      <default>false</default>
+      <summary>Whether to cache media on disk instead of memory</summary>
+    </key>
     <key name="threads" type="i">
       <default>1</default>
       <summary>Default threads</summary>

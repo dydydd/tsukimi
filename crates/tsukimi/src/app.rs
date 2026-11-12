@@ -189,6 +189,12 @@ mod imp {
             let demuxer_max_bytes = format!("{}MiB", SETTINGS.mpv_cache_size());
             init.set_option("demuxer-max-bytes", demuxer_max_bytes.as_str())?;
             init.set_option("cache-secs", SETTINGS.mpv_cache_time() as f64)?;
+            init.set_option("cache-on-disk", SETTINGS.mpv_cache_on_disk())?;
+            if SETTINGS.mpv_cache_on_disk() {
+                let cache_dir = gtk::glib::user_cache_dir().join("tsukimi").join("mpv-cache");
+                let _ = std::fs::create_dir_all(&cache_dir);
+                init.set_option("demuxer-cache-dir", cache_dir.to_string_lossy().as_ref())?;
+            }
             init.set_option("volume-max", MAX_VOLUME)?;
             init.set_option("volume", SETTINGS.mpv_default_volume() as i64)?;
 

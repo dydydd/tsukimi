@@ -125,6 +125,17 @@
                     </property>
                   </object>
                 </child>
+                <child>
+                  <object class="AdwSwitchRow" id="cache_on_disk_switchrow">
+                    <child type="prefix">
+                      <object class="GtkImage">
+                        <property name="icon-name">drive-harddisk-symbolic</property>
+                      </object>
+                    </child>
+                    <property name="title" translatable="yes">Cache on Disk</property>
+                    <property name="subtitle" translatable="yes">Store media cache on disk instead of memory</property>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
