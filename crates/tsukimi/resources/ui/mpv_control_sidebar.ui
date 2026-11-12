@@ -137,15 +137,30 @@
                   </object>
                 </child>
                 <child>
-                  <object class="AdwActionRow" id="cache_usage_row">
-                    <child type="prefix">
+                  <object class="GtkBox" id="cache_usage_row">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">8</property>
+                    <property name="margin-top">6</property>
+                    <property name="margin-bottom">6</property>
+                    <child>
                       <object class="GtkImage">
                         <property name="icon-name">folder-symbolic</property>
                       </object>
                     </child>
-                    <property name="title" translatable="yes">Cache Usage</property>
-                    <property name="subtitle">0 MB</property>
-                    <child type="suffix">
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Cache Usage:</property>
+                        <property name="halign">start</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="cache_usage_label">
+                        <property name="label">0 MB</property>
+                        <property name="hexpand">True</property>
+                        <property name="halign">start</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="clear_cache_button">
                         <property name="label" translatable="yes">Clear</property>
                         <property name="valign">center</property>

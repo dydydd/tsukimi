@@ -51,7 +51,7 @@ mod imp {
         #[template_child]
         pub cache_on_disk_switchrow: TemplateChild<adw::SwitchRow>,
         #[template_child]
-        pub cache_usage_row: TemplateChild<adw::ActionRow>,
+        pub cache_usage_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub clear_cache_button: TemplateChild<gtk::Button>,
 
@@ -368,9 +368,9 @@ impl MPVControlSidebar {
         let bytes = dir_size(&dir);
         let mb = bytes as f64 / (1024.0 * 1024.0);
         self.imp()
-            .cache_usage_row
+            .cache_usage_label
             .get()
-            .set_subtitle(&format!("{:.1} MB", mb));
+            .set_label(&format!("{:.1} MB", mb));
     }
 
     #[template_callback]
