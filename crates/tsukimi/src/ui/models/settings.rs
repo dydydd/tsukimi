@@ -41,6 +41,7 @@ impl Settings {
     const KEY_MPV_CONFIG: &'static str = "mpv-config";
     const KEY_MPV_CACHE_SIZE: &'static str = "mpv-cache-size";
     const KEY_MPV_CACHE_TIME: &'static str = "mpv-cache-time";
+    const KEY_MPV_CACHE_ON_DISK: &'static str = "mpv-cache-on-disk";
     const KEY_MPV_SUBTITLE_BOLD: &'static str = "mpv-subtitle-bold"; // bool
     const KEY_MPV_SUBTITLE_ITALIC: &'static str = "mpv-subtitle-italic"; // bool
     const KEY_MPV_SUBTITLE_JUSTIFY: &'static str = "mpv-subtitle-justify"; // i32
@@ -489,6 +490,10 @@ impl Settings {
 
     pub fn mpv_cache_time(&self) -> i32 {
         self.int(Self::KEY_MPV_CACHE_TIME)
+    }
+
+    pub fn mpv_cache_on_disk(&self) -> bool {
+        self.boolean(Self::KEY_MPV_CACHE_ON_DISK)
     }
 
     pub fn mpv_cache_size(&self) -> i32 {
