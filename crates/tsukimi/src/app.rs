@@ -191,7 +191,9 @@ mod imp {
             init.set_option("cache-secs", SETTINGS.mpv_cache_time() as f64)?;
             init.set_option("cache-on-disk", SETTINGS.mpv_cache_on_disk())?;
             if SETTINGS.mpv_cache_on_disk() {
-                let cache_dir = gtk::glib::user_cache_dir().join("tsukimi").join("mpv-cache");
+                let cache_dir = gtk::glib::user_cache_dir()
+                    .join("tsukimi")
+                    .join("mpv-cache");
                 let _ = std::fs::create_dir_all(&cache_dir);
                 init.set_option("demuxer-cache-dir", cache_dir.to_string_lossy().as_ref())?;
             }

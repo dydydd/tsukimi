@@ -51,7 +51,7 @@ mod imp {
         #[template_child]
         pub cache_on_disk_switchrow: TemplateChild<adw::SwitchRow>,
         #[template_child]
-        pub cache_usage_row: TemplateChild<adw::ActionRow>,
+        pub cache_usage_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub clear_cache_button: TemplateChild<gtk::Button>,
 
@@ -291,7 +291,11 @@ impl MPVControlSidebar {
             .bind("mpv-cache-time", &imp.cache_time_adj.get(), "value")
             .build();
         SETTINGS
-            .bind("mpv-cache-on-disk", &imp.cache_on_disk_switchrow.get(), "active")
+            .bind(
+                "mpv-cache-on-disk",
+                &imp.cache_on_disk_switchrow.get(),
+                "active",
+            )
             .build();
         SETTINGS
             .bind("mpv-deband", &imp.deband_switch.get(), "active")
@@ -368,9 +372,9 @@ impl MPVControlSidebar {
         let bytes = dir_size(&dir);
         let mb = bytes as f64 / (1024.0 * 1024.0);
         self.imp()
-            .cache_usage_row
+            .cache_usage_label
             .get()
-            .set_subtitle(&format!("{:.1} MB", mb));
+            .set_label(&format!("{:.1} MB", mb));
     }
 
     #[template_callback]
@@ -697,7 +701,9 @@ fn rgba_to_mpv_color(rgba: (f32, f32, f32, f32)) -> String {
 }
 
 fn cache_dir() -> std::path::PathBuf {
-    gtk::glib::user_cache_dir().join("tsukimi").join("mpv-cache")
+    gtk::glib::user_cache_dir()
+        .join("tsukimi")
+        .join("mpv-cache")
 }
 
 fn dir_size(path: &std::path::Path) -> u64 {
