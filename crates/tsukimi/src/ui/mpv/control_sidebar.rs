@@ -50,6 +50,10 @@ mod imp {
         pub cache_time_adj: TemplateChild<gtk::Adjustment>,
         #[template_child]
         pub cache_on_disk_switchrow: TemplateChild<adw::SwitchRow>,
+        #[template_child]
+        pub cache_usage_row: TemplateChild<adw::ActionRow>,
+        #[template_child]
+        pub clear_cache_button: TemplateChild<gtk::Button>,
 
         #[template_child]
         pub brightness_adj: TemplateChild<gtk::Adjustment>,
@@ -138,6 +142,7 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             self.obj().bind_actions();
+            self.obj().refresh_cache_usage();
         }
     }
 
@@ -356,6 +361,31 @@ impl MPVControlSidebar {
                 "selected",
             )
             .build();
+    }
+
+    pub fn refresh_cache_usage(&self) {
+        let dir = cache_dir();
+        let bytes = dir_size(&dir);
+        let mb = bytes as f64 / (1024.0 * 1024.0);
+        self.imp()
+            .cache_usage_row
+            .get()
+            .set_subtitle(&format!("{:.1} MB", mb));
+    }
+
+    pub fn on_clear_cache(&self, _button: gtk::Button) {
+        let dir = cache_dir();
+        if let Ok(entries) = std::fs::read_dir(&dir) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if p.is_dir() {
+                    let _ = std::fs::remove_dir_all(&p);
+                } else {
+                    let _ = std::fs::remove_file(&p);
+                }
+            }
+        }
+        self.refresh_cache_usage();
     }
 
     pub fn set_mpv_property<V>(&self, property: &str, value: V)
@@ -663,4 +693,25 @@ fn rgba_from_settings(value: String, default: gtk::gdk::RGBA) -> gtk::gdk::RGBA 
 
 fn rgba_to_mpv_color(rgba: (f32, f32, f32, f32)) -> String {
     format!("{}/{}/{}/{}", rgba.0, rgba.1, rgba.2, rgba.3)
+}
+
+fn cache_dir() -> std::path::PathBuf {
+    gtk::glib::user_cache_dir().join("tsukimi").join("mpv-cache")
+}
+
+fn dir_size(path: &std::path::Path) -> u64 {
+    let mut total = 0u64;
+    if let Ok(entries) = std::fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if let Ok(meta) = entry.metadata() {
+                if meta.is_dir() {
+                    total += dir_size(&p);
+                } else {
+                    total += meta.len();
+                }
+            }
+        }
+    }
+    total
 }
