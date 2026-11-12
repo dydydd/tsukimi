@@ -41,6 +41,16 @@ jobs:
             git checkout -b sync/upstream
           fi
 
+          # Keep fork-specific commits from main in the sync branch.
+          if git merge --no-ff --no-edit main; then
+            echo "Merged main into sync branch."
+          else
+            echo "::error::Merge conflict while merging main into sync/upstream. Resolve manually."
+            git merge --abort
+            exit 1
+          fi
+
+          # Bring in upstream changes.
           if git merge --no-ff --no-edit upstream/main; then
             echo "Merge succeeded."
           else
