@@ -478,6 +478,8 @@
                                 <property name="height-request">10</property>
                                 <property name="hexpand">True</property>
                                 <property name="focusable">False</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
                               </object>
                             </child>
                             <child>
