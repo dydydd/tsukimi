@@ -72,10 +72,11 @@ jobs:
             echo "No new commits to sync; skipping pull request."
             exit 0
           fi
-          if gh pr view sync/upstream --json number >/dev/null 2>&1; then
+          if gh pr view sync/upstream -R ${{ github.repository }} --json number >/dev/null 2>&1; then
             echo "Pull request already exists; branch push updated it."
           else
             gh pr create \
+              -R ${{ github.repository }} \
               --base main \
               --head sync/upstream \
               --title "chore: sync upstream" \
